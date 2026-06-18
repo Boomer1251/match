@@ -96,6 +96,7 @@
             gap: 8px;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            touch-action: manipulation;
         }
 
         .tab-btn.active {
@@ -127,6 +128,7 @@
             -webkit-backdrop-filter: blur(20px);
             transition: var(--transition-smooth);
             overflow: hidden;
+            will-change: transform;
         }
 
         #vfx-canvas {
@@ -297,6 +299,7 @@
             justify-content: center;
             gap: 8px;
             font-weight: 600;
+            touch-action: manipulation;
         }
         
         button.toggle-btn.active {
@@ -457,6 +460,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            will-change: transform;
         }
 
         .match-card {
@@ -853,7 +857,7 @@
                         <div class="teams">Haiti – Szkocja</div>
                         <div class="venue">Gillette Stadium, Boston</div>
                     </div>
-                    <div class="match-card" data-group="grupa D" data-teams="Australia Turcja" data-time="2026-06-14T06:00:00" style="background-image: url('https://flagcdn.com/w160/au.png');">
+                    <div class="match-card" data-group="grupa d" data-teams="Australia Turcja" data-time="2026-06-14T06:00:00" style="background-image: url('https://flagcdn.com/w160/au.png');">
                         <div class="match-header">
                             <div class="time-box"><span class="time">06:00</span><span class="card-top-countdown">---</span></div>
                             <span class="group-badge">Grupa D</span>
@@ -1046,7 +1050,7 @@
                         <div class="teams">Meksyk – Korea Południowa</div>
                         <div class="venue">Estadio Akron, Guadalajara</div>
                     </div>
-                    <div class="match-card" data-group="grupa D" data-teams="USA Australia" data-time="2026-06-19T21:00:00" style="background-image: url('https://flagcdn.com/w160/us.png');">
+                    <div class="match-card" data-group="grupa d" data-teams="USA Australia" data-time="2026-06-19T21:00:00" style="background-image: url('https://flagcdn.com/w160/us.png');">
                         <div class="match-header">
                             <div class="time-box"><span class="time">21:00</span><span class="card-top-countdown">---</span></div>
                             <span class="group-badge">Grupa D</span></div>
@@ -1073,7 +1077,7 @@
                         <div class="teams">Brazylia – Haiti</div>
                         <div class="venue">Lincoln Financial Field, Filadelfia</div>
                     </div>
-                    <div class="match-card" data-group="grupa D" data-teams="Turcja Paragwaj" data-time="2026-06-20T05:00:00" style="background-image: url('https://flagcdn.com/w160/tr.png');">
+                    <div class="match-card" data-group="grupa d" data-teams="Turcja Paragwaj" data-time="2026-06-20T05:00:00" style="background-image: url('https://flagcdn.com/w160/tr.png');">
                         <div class="match-header">
                             <div class="time-box"><span class="time">05:00</span><span class="card-top-countdown">---</span></div>
                             <span class="group-badge">Grupa D</span></div>
@@ -1509,12 +1513,18 @@
         ]
     };
 
+    function isMobile() {
+        return window.innerWidth < 769;
+    }
+
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         
         document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
         
         if(tabId === 'groups-tab') {
             updateGroupsTimelineView();
@@ -1554,7 +1564,7 @@
     }
 
     function drawVFX() {
-        if (!ctx) return;
+        if (!ctx || isMobile()) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         if (flagsLoaded && particles.length < 25 && Math.random() < 0.2) {
@@ -1586,7 +1596,8 @@
     function toggleVFX(enable) {
         const canvasEl = document.getElementById('vfx-canvas');
         if (!canvasEl) return;
-        if (enable) {
+        
+        if (enable && !isMobile()) {
             if (!animationFrameId) {
                 canvasEl.style.display = 'block';
                 resizeCanvas();
@@ -1596,10 +1607,10 @@
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles = [];
-                canvasEl.style.display = 'none';
             }
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = [];
+            canvasEl.style.display = 'none';
         }
     }
 
@@ -1611,7 +1622,7 @@
 
     function guessSecondFlagUrl(teamString) {
         const lower = teamString.toLowerCase();
-        if(lower.includes("rpa")) return "https://flagcdn.com/w160/za.png";
+        if(lower.includes("rpa") || lower.includes("za.")) return "https://flagcdn.com/w160/za.png";
         if(lower.includes("czechy")) return "https://flagcdn.com/w160/cz.png";
         if(lower.includes("bośnia")) return "https://flagcdn.com/w160/ba.png";
         if(lower.includes("paragwaj")) return "https://flagcdn.com/w160/py.png";
@@ -1623,7 +1634,7 @@
         if(lower.includes("japonia")) return "https://flagcdn.com/w160/jp.png";
         if(lower.includes("ekwador")) return "https://flagcdn.com/w160/ec.png";
         if(lower.includes("tunezja")) return "https://flagcdn.com/w160/tn.png";
-        if(lower.includes("republika zielonego") || lower.includes("przylądka")) return "https://flagcdn.com/w160/cv.png";
+        if(lower.includes("republika zielonego") || lower.includes("przylądka") || lower.includes("zielony")) return "https://flagcdn.com/w160/cv.png";
         if(lower.includes("egipt")) return "https://flagcdn.com/w160/eg.png";
         if(lower.includes("urugwaj")) return "https://flagcdn.com/w160/uy.png";
         if(lower.includes("nowa zelandia")) return "https://flagcdn.com/w160/nz.png";
@@ -1631,7 +1642,7 @@
         if(lower.includes("norwegia")) return "https://flagcdn.com/w160/no.png";
         if(lower.includes("algieria")) return "https://flagcdn.com/w160/dz.png";
         if(lower.includes("jordania")) return "https://flagcdn.com/w160/jo.png";
-        if(lower.includes("dr konga")) return "https://flagcdn.com/w160/cd.png";
+        if(lower.includes("dr konga") || lower.includes("konga")) return "https://flagcdn.com/w160/cd.png";
         if(lower.includes("chorwacja")) return "https://flagcdn.com/w160/hr.png";
         if(lower.includes("panama")) return "https://flagcdn.com/w160/pa.png";
         if(lower.includes("kolumbia")) return "https://flagcdn.com/w160/co.png";
@@ -1643,7 +1654,7 @@
         if(lower.includes("szwecja")) return "https://flagcdn.com/w160/se.png";
         if(lower.includes("hiszpania")) return "https://flagcdn.com/w160/es.png";
         if(lower.includes("belgia")) return "https://flagcdn.com/w160/be.png";
-        if(lower.includes("arabia") || lower.includes("saudyjska")) return "https://flagcdn.com/w160/sa.png";
+        if(lower.includes("arabia") || lower.includes("saudyjska") || lower.includes("saud.")) return "https://flagcdn.com/w160/sa.png";
         if(lower.includes("iran")) return "https://flagcdn.com/w160/ir.png";
         if(lower.includes("francja")) return "https://flagcdn.com/w160/fr.png";
         if(lower.includes("irak")) return "https://flagcdn.com/w160/iq.png";
@@ -1657,6 +1668,8 @@
         if(lower.includes("haiti")) return "https://flagcdn.com/w160/ht.png";
         if(lower.includes("brazylia")) return "https://flagcdn.com/w160/br.png";
         if(lower.includes("usa")) return "https://flagcdn.com/w160/us.png";
+        if(lower.includes("wks") || lower.includes("wybrzeże")) return "https://flagcdn.com/w160/ci.png";
+        if(lower.includes("meksyk")) return "https://flagcdn.com/w160/mx.png";
         return "https://flagcdn.com/w160/un.png";
     }
 
@@ -1680,6 +1693,11 @@
         buildGroupsDOM();
         updateLiveStatus();
         setInterval(updateLiveStatus, 1000);
+        window.addEventListener('resize', () => {
+            if (isMobile()) {
+                toggleVFX(false);
+            }
+        });
     }
 
     /* Premium Custom Select Interactivity Core Physics Layer */
